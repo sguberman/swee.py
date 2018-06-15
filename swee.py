@@ -110,13 +110,13 @@ def main(size=15, bombs=30, cheat=False):
     grid = make_grid(size, bombs)
     revealed = []
 
-    if cheat:
+    if cheat:  # show the whole grid without hiding anything
         draw(grid)
     else:
         draw(reveal(grid))
 
-    while True:
-        if len(revealed) == size * size - bombs:
+    while True:  # main loop
+        if len(revealed) == size * size - bombs:  # found all empty spaces
             print('YOU WIN!')
             break
 
@@ -136,18 +136,28 @@ def main(size=15, bombs=30, cheat=False):
             print('Or enter a blank line to quit.')
             continue
 
-        turn = pick(grid, location)
-        if not turn:
+        i, j = location
+        try:
+            assert 0 <= i <= len(grid)
+            assert 0 <= j <= len(grid[0])
+        except AssertionError:
+            print('Invalid input.')
+            print('Choose a row and column number that actually exist.')
+            continue
+
+        new_boxes = pick(grid, location)
+        if not new_boxes:  # picked a bomb
             print('BOOM! YOU LOSE.')
             break
 
-        revealed.extend(turn)
+        revealed.extend(new_boxes)
         draw(reveal(grid, revealed))
 
+    # end of game
     draw(grid)
     again = input('Play again? [Y/n] -> ')
     if again in 'yY':
-        main(size=size, bombs=bombs, cheat=cheat)
+        main(size, bombs, cheat)
 
 
 if __name__ == '__main__':
