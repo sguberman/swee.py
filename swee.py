@@ -2,7 +2,7 @@ import copy
 import random
 
 
-def make_grid(size=10, bombs=20):
+def make_grid(size=15, bombs=30):
 
     # blank (size x size) grid
     grid = [[0 for box in range(size)] for row in range(size)]
@@ -27,10 +27,10 @@ def make_grid(size=10, bombs=20):
 
 
 def draw(grid):
-    print('    ' + '0 1 2 3 4 5 6 7 8 9')
-    print('    ' + '===================')
+    print(' ' * 6 + ' '.join(str(x + 1).rjust(2) for x in range(len(grid[0]))))
+    print('     ' + '=' * 3 * len(grid[0]))
     for i, row in enumerate(grid):
-        print(f'{i} | ' + ' '.join(str(box) for box in row))
+        print(f' {i + 1:2d} | ' + ' '.join(str(box).rjust(2) for box in row))
 
 
 def next_to(grid, location):
@@ -63,7 +63,9 @@ def next_to(grid, location):
     return valid_coordinates
 
 
-def reveal(grid, locations):
+def reveal(grid, locations=None):
+    if locations is None:
+        locations = []
     revealed = copy.deepcopy(grid)
     for i in range(len(grid)):
         for j in range(len(grid[0])):
@@ -97,20 +99,56 @@ def pick(grid, location, visited=None):
         )
 
 
-def main():
-    grid = make_grid(bombs=10)
+def parse_input(text):
+    i, j = map(int, text.split())
+    i -= 1
+    j -= 1
+    return i, j
+
+
+def main(size=15, bombs=30, cheat=False):
+    grid = make_grid(size, bombs)
     revealed = []
-    draw(grid)
+
+    if cheat:
+        draw(grid)
+    else:
+        draw(reveal(grid))
+
     while True:
-        i, j = map(int, input('Pick a box: ').split())
-        turn = pick(grid, (i, j))
-        if not turn:
-            print('GAME OVER!')
-            draw(grid)
+        if len(revealed) == size * size - bombs:
+            print('YOU WIN!')
             break
+
+        text = input('Pick a box [row col] -> ')
+        if not text or text.lower() == 'q':
+            break
+
+        if text == 'cheat':
+            draw(grid)
+            continue
+
+        try:
+            location = parse_input(text)
+        except ValueError:
+            print('Invalid input.')
+            print('Enter a row and column number separated by a space.')
+            print('Or enter a blank line to quit.')
+            continue
+
+        turn = pick(grid, location)
+        if not turn:
+            print('BOOM! YOU LOSE.')
+            break
+
         revealed.extend(turn)
         draw(reveal(grid, revealed))
 
+    draw(grid)
+    again = input('Play again? [Y/n] -> ')
+    if again in 'yY':
+        main(size=size, bombs=bombs, cheat=cheat)
+
 
 if __name__ == '__main__':
-    main()
+    main(bombs=1, cheat=True)
