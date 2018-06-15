@@ -151,4 +151,4 @@ def main(size=15, bombs=30, cheat=False):
 
 
 if __name__ == '__main__':
-    main(bombs=1, cheat=True)
+    main()
